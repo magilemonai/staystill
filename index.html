@@ -674,7 +674,7 @@
   /* ===================== END SCREEN ===================== */
   #end {
     position: absolute; inset: 0;
-    background: rgba(0,0,0,0.92);
+    background: rgba(2, 3, 6, 0.97);
     z-index: 60;
     display: none;
     flex-direction: column; align-items: center; justify-content: center;
@@ -689,8 +689,8 @@
   }
   #end.win h1 { background: linear-gradient(180deg, #fff, #ffd23f, #34c759); -webkit-background-clip: text; background-clip: text; color: transparent; }
   #end.lose h1 { background: linear-gradient(180deg, #fff, #ff3344); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  #end .reason { font-size: 22px; color: #c9cdd6; margin-top: 16px; max-width: 600px; line-height: 1.4; }
-  #end .standings { margin-top: 36px; font-family: "SF Mono", monospace; font-size: 14px; color: #8b909c; max-width: 90vw; }
+  #end .reason { font-size: 22px; color: #e0e3ea; margin-top: 16px; max-width: 600px; line-height: 1.4; text-shadow: 0 1px 3px #000; }
+  #end .standings { margin-top: 36px; font-family: "SF Mono", monospace; font-size: 14px; color: #9aa0ad; max-width: 90vw; text-shadow: 0 1px 2px #000; }
   #end .standings div { padding: 4px 0; }
   #end .standings .me { color: var(--paint); font-weight: 700; }
   #end button {
@@ -869,6 +869,10 @@
     font-size: clamp(14px, 1.8vw, 20px);
     line-height: 1.5; color: #e8e8ee;
     text-shadow: 0 2px 8px #000, 0 0 24px rgba(0,0,0,0.9);
+    background: rgba(5, 7, 12, 0.78);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 16px 24px;
     min-height: 60px;
     opacity: 0; transition: opacity 0.5s;
   }
@@ -2319,13 +2323,25 @@ function announce(text, color = "#ffd23f", sound = true) {
   if (sound) sfxAirhorn();
 }
 
-function showTimecard(text, holdMs = 2200, after) {
+function showTimecard(text, holdMs = 2200, after, atBlack) {
   timecardEl.textContent = text;
   timecardEl.classList.add("show");
+  // fires once the 0.8s fade-in has fully covered the screen —
+  // the place to swap scenery without the audience seeing the stagehands
+  if (atBlack) timers.push(setTimeout(atBlack, 1000));
   timers.push(setTimeout(() => {
     timecardEl.classList.remove("show");
     if (after) timers.push(setTimeout(after, 800));
   }, holdMs));
+}
+
+/* apply sky changes instantly (bypasses the slow tint/star transitions) */
+function snapSky(mutate) {
+  const els = [$("sky-tint"), $("stars")];
+  els.forEach(el => el.style.transition = "none");
+  mutate();
+  void trackEl.offsetWidth;
+  els.forEach(el => el.style.removeProperty("transition"));
 }
 
 let narratorTimer = null;
@@ -2524,13 +2540,17 @@ function scheduleActs() {
   atT(T.nightCard, () => {
     if (gameState !== "racing") return;
     phase = "night";
-    trackEl.classList.remove("dusk");
     showTimecard("· 4 HOURS LATER ·", 2400, () => {
-      trackEl.classList.add("night");
       sfxCricket();
       raceIntervals.push(setInterval(() => {
         if (gameState === "racing" && phase === "night") sfxCricket();
       }, 6000));
+    }, () => {
+      // swap dusk → night behind the black card, so we come back to a done deal
+      snapSky(() => {
+        trackEl.classList.remove("dusk");
+        trackEl.classList.add("night");
+      });
     });
   });
 
