@@ -114,7 +114,7 @@ Generic characters in notifications: **Sarah (Ex)**, **Jason (8)**, **Mom**, **K
 ## Tuning knobs
 
 - `T` — **master act timeline** (seconds after GO). Every reveal keys off this. This is the main pacing dial now.
-- `NARRATOR_LINES` — the fourth-wall monologue right before the finale unlock (each `{t, text}`; `t` is advisory, they play in sequence after `T.crashClear`).
+- `NARRATOR_LINES` — the fourth-wall monologue right before the finale unlock (each `{t, text}`; `t` is advisory, they play in sequence after `T.crashClear`). `text` can be a function evaluated at speak-time — the census line ("Four went home — Gerard has a family...") counts `aliveRacers` so it stays true no matter who rejoined or who you're playing.
 - `FINALE_DISTANCE` — meters to the real finish in the mash-to-win phase (friction bleeds `finale.speed` ~2.2/tick, +7 per tap).
 - `AI_BREAK_TIMES` — when each AI cracks in Act 1. Pacing: 3 immediate, then 14 / 28 / 45 / 65 / 88.
 - `NOTIFICATION_POOL` — three tonal waves (Act 1 chaos, Act 2 long-night despair, Act 3 horror). Add jokes, retime urgency.
