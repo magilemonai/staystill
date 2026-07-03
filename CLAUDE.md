@@ -25,7 +25,12 @@ Everything lives at the project root.
 - `index.html` — the entire game (HTML + CSS + JS in one file)
 - `Saturday Brass Parade.mp3` — menu music (title → mode → cup → racer → loading)
 - `Pixel Crown.mp3` — race music (crossfade in at race start)
+- `NEXT.md` / `LOOPS.md` — steering files for Cody's "magi lemon" command; edit freely, `- [x]` hides a bullet
 - No build step, no dependencies. Just `open index.html` in a browser.
+
+## Deployment
+
+Live at **https://magilemonai.github.io/staystill/** (GitHub Pages, serving `main` branch root of https://github.com/magilemonai/staystill — a public repo, so the MP3s are downloadable; Cody's fine with that). To ship a change: commit and `git push`, Pages rebuilds in ~1 minute. Sanity-check by curling the live URL for a string from the new code.
 
 ## Architecture
 
@@ -136,18 +141,30 @@ In rough chronological order:
 5. **Two-track music**: added `Saturday Brass Parade.mp3` for the menus. Crossfades to `Pixel Crown.mp3` at the moment the track screen appears (just before countdown).
 6. **Autoplay attempt**: brass parade tries to start on page load; falls back to first-gesture if the browser blocks autoplay.
 
+### 2026-07-02 — polish round + deployment (all fixes from Cody's live playtest)
+
+- **Warped-music bug**: dying during/after the horror act left `playbackRate` at ~0.45–0.9, so the next race's Pixel Crown played in slow motion. `switchToRaceMusic` now resets it.
+- **Sky swap behind the timecard**: dusk→night used to crossfade visibly after the "4 HOURS LATER" card. `snapSky()` now swaps it instantly while the screen is fully black (via `showTimecard`'s `atBlack` callback).
+- **Readability**: narrator monologue got a dark panel; end screen backdrop deepened with text shadows.
+- **End screen clipping**: flex-centering clipped "WINNER!" on short windows. Now `flex-start` + `overflow-y: auto` with auto margins on first/last children — centers when it fits, scrolls when it doesn't.
+- **Narrator census**: "Seven went home. Dale has a family" was wrong once racers rejoined (or if you WERE Dale). The line is now computed at speak-time from `aliveRacers`/`standings`.
+- **Shipped**: public repo + GitHub Pages (see Deployment).
+
 ### 2026-07-01 — the genre-twist rebuild
 
 Turned the ~95s one-note bit into a five-act escalation with three reveals (see "The twist" up top). Added: the act director + `T` timeline, lap-2 fakeout, night/3AM time cards, a horror act (music tape-warp, vignette, approaching eyes, tightening move tolerance), a fake OS-crash dialog trap, a typewriter narrator that breaks the fourth wall, and an inverted finale where you finally have to MASH to cross a real finish line — with a WINNER podium ending and a secret MONUMENT ending for refusing to move even then. Also a live stillness-points score, COPY RESULT share card, and `?ts=`/`?debug` dev hooks. Kept it single-file vanilla; kept Cody's two MP3s (the horror act bends `Pixel Crown` rather than replacing it). **Fixed a latent infinite loop** in `pushNotification`'s cap logic (deferred `.remove()` inside a `while (children.length > 5)` never terminated once the denser notification pool overflowed the cap) — verified via a jsdom harness that drove all endings.
 
 ## Possible next steps Cody might want
 
+(The live list lives in `NEXT.md` — keep that one current.)
+
+- Playtest the full five-act arc at real speed (not `?ts=6`) to tune comedy timing — still not done as of 2026-07-02.
 - Hooking up the locked modes/cups for variations (TIME TRIAL = race solo against a clock, VS = pick the AI roster, BATTLE = ???).
 - More notification jokes — the pool has room and the comedy is in the writing.
-- Mobile pass: the racer-select grid (4 columns) probably needs to collapse to 2 columns at narrow widths.
-- A short "winner ceremony" screen with a podium animation before the standings, MK64-style.
+- Mobile pass: the racer-select grid (4 columns) probably needs to collapse to 2 columns at narrow widths; touch = instant loss also makes phones rough.
 - Difficulty knob (50cc / 100cc / 150cc) that scales the AI break times.
-- A way to share results — screenshot of the standings or a sharable end card.
+
+Done since this list was written: winner podium (photo-finish ending), shareable result (COPY RESULT button).
 
 ## Cody-specific notes
 
